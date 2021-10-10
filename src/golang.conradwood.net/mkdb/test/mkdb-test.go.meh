@@ -1,0 +1,43 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"golang.gurusys.co.uk/apis/common"
+	"golang.gurusys.co.uk/go-framework/sql"
+	"golang.gurusys.co.uk/go-framework/tokens"
+	"golang.gurusys.co.uk/go-framework/utils"
+)
+
+func main() {
+	flag.Parse()
+	db, err := sql.Open()
+	utils.Bail("could not open db", err)
+	n := NewprotoSave(db)
+
+	ctx := tokens.ContextWithToken()
+	foo := &common.Measurement{
+		Value:     float64(utils.RandomInt(1000)),
+		Timestamp: uint32(utils.RandomInt(33333333)),
+	}
+	id, err := n.Save(foo)
+	utils.Bail("failed to save", err)
+
+	fmt.Printf("ID of new object: %d\n", id)
+	foo.SensorLocationID = uint32(id)
+	v, err := n.BySensorLocationID(ctx, id)
+	utils.Bail("Failed to get by sensorlocationid", err)
+	fmt.Printf("value: %v\n", v)
+	va, err := n.ByValue(ctx, foo.Value)
+	utils.Bail("Failed to get by Value", err)
+	fmt.Printf("Got %d by value\n", len(va))
+	va, err = n.ByTimestamp(ctx, foo.Timestamp)
+	utils.Bail("Failed to get by Timestamp", err)
+	fmt.Printf("Got %d by Timestamp\n", len(va))
+	foo.Value = 5
+
+	err = n.Update(ctx, foo)
+	utils.Bail("Failed to update", err)
+	fmt.Println("Successfully updated database")
+	fmt.Println("Done. Pass.")
+}
