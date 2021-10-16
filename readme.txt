@@ -8,7 +8,7 @@ Example usage:
 
 === list all the protobufs in a protofile:
 
- mkdb-client -protofile ~/devel/guru/proto/protos/golang.gurusys.co.uk/apis/logservice/logservice.proto -messages
+ mkdb-client -protofile protos/golang.conradwood.net/apis/logservice/logservice.proto -messages
 Name:"LogAppDef" 
 Name:"LogLine" 
 Name:"LogRequest" 
@@ -24,7 +24,7 @@ Name:"EmptyRequest"
 Name:"CloseLogRequest" 
 
 === create a go file from a protobuf:
-mkdb-client -protofile ~/devel/guru/proto/protos/golang.gurusys.co.uk/apis/logservice/logservice.proto -create -protobuf=LogLine -out=/tmp/foo.go
+mkdb-client -protofile protos/golang.conradwood.netprotos/golang.conradwood.net//apis/logservice/logservice.proto -create -protobuf=LogLine -out=/tmp/foo.go
 
 the contents of "/tmp/foo.go" now contain a compilable .go file with database Accessors:
 
