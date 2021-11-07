@@ -71,3 +71,4 @@ message Foo {
  Bar BarObject=1 [(common.sql_unique)="true"];
 }
 
+
