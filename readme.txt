@@ -1,9 +1,6 @@
 mkdb:
   create go files from a proto to update/select/insert protos in sql
 
-There is also a presentation available here:
-https://docs.google.com/presentation/d/1qHx1vUDHXdQ_CTQHeaJYxhDrFEoBtbegO_B_Kh_TyuU/edit#slide=id.p
-
 Example usage:
 
 === list all the protobufs in a protofile:
