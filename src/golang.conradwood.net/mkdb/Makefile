@@ -7,5 +7,5 @@ server:
 	cd server && go install ${LDFLAGS} mkdb-server.go
 test: client
 	${GOBIN}/mkdb-client >test/thing.go
-	cd test && go install  mkdb-test.go thing.go
+	cd test && go install ${LDFLAGS}  mkdb-test.go thing.go
 
