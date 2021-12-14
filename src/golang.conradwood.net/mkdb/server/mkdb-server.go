@@ -304,7 +304,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 		return
 	}
 	gof := creator.DBGo()
-	res, err := linux.SafelyExecute([]string{"gofmt"}, strings.NewReader(gof))
+	res, err := linux.SafelyExecute([]string{"/opt/yacloud/ctools/dev/go/current/go/bin/gofmt"}, strings.NewReader(gof))
 	if err != nil {
 		fmt.Printf("gofmt failed:\n%s\n", gof)
 		if *save_fail {
