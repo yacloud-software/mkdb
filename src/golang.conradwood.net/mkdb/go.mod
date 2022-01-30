@@ -6,7 +6,7 @@ require (
 	github.com/emicklei/proto v1.9.1
 	golang.conradwood.net/apis/mkdb v1.1.1417
 	golang.conradwood.net/go-easyops v0.1.10572
-	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc v1.42.0
 )
 
 require (
@@ -21,18 +21,18 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	golang.conradwood.net/apis/auth v1.1.1457 // indirect
 	golang.conradwood.net/apis/autodeployer v1.1.1457 // indirect
-	golang.conradwood.net/apis/common v1.1.1494 // indirect
+	golang.conradwood.net/apis/common v1.1.1457 // indirect
 	golang.conradwood.net/apis/deploymonkey v1.1.1457 // indirect
 	golang.conradwood.net/apis/echoservice v1.1.1457 // indirect
 	golang.conradwood.net/apis/errorlogger v1.1.1457 // indirect
 	golang.conradwood.net/apis/framework v1.1.1457 // indirect
-	golang.conradwood.net/apis/objectstore v1.1.1494 // indirect
+	golang.conradwood.net/apis/objectstore v1.1.1457 // indirect
 	golang.conradwood.net/apis/registry v1.1.1457 // indirect
 	golang.conradwood.net/apis/rpcinterceptor v1.1.1457 // indirect
-	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect
-	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
+	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
+	golang.org/x/sys v0.0.0-20211213223007-03aa0b5f6827 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20220111164026-67b88f271998 // indirect
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
 
