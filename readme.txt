@@ -73,6 +73,11 @@ message Foo {
  Bar BarObject=1 [(common.sql_ignore)="true"];
 }
 
+// one may change the sql name of a field
+message Foo {
+ Bar BarObject=1 [(common.sql_name)="foocolumnname"];
+}
+
 
 
 
