@@ -68,6 +68,10 @@ message Foo {
  Bar BarObject=1 [(common.sql_unique)="true"];
 }
 
+// one may mark a field as irrelevant for sql (e.g. one that is derived from other fields)
+message Foo {
+ Bar BarObject=1 [(common.sql_ignore)="true"];
+}
 
 
 
