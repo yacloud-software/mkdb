@@ -223,16 +223,22 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 			}
 		}
 		opts := make(map[string]string)
+		ignore := false
 		for _, o := range x.Options {
 			opts[o.Name] = o.Constant.Source
 			if o.Name == "(common.sql_type)" {
 				fmt.Printf("SQL_Type for \"%s\" overriden to \"%s\"\n", x.Name, o.Constant.Source)
 				x.Type = o.Constant.Source
+			} else if o.Name == "(common.sql_ignore)" {
+				ignore = true
 			} else if o.Name == "(common.sql_reference)" {
 				fmt.Printf("SQL_Reference for \"%s\": \"%s\"\n", x.Name, o.Constant.Source)
 			} else {
 				fmt.Printf("Option for %s: %#v\n", x.Name, o)
 			}
+		}
+		if ignore {
+			continue
 		}
 		if strings.HasPrefix(strings.ToLower(x.Name), "obsolete_") {
 			continue

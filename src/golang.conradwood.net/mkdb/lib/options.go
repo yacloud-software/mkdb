@@ -16,6 +16,10 @@ func (c *Creator) GetOptSQLUnique(field *mkdb.ProtoField) bool {
 	return found
 
 }
+func (c *Creator) HasIgnoreOption(field *mkdb.ProtoField) bool {
+	found, _ := c.GetOpt(field, "(common.sql_ignore)")
+	return found
+}
 
 // of sql_reference: get key and value
 func (c *Creator) GetOptSQLReference(field *mkdb.ProtoField) (bool, string, string) {

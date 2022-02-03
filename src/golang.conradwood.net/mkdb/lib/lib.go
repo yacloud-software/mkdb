@@ -15,11 +15,12 @@ var (
 	tmplfile = flag.String("template_file", "configs/mkdb/godb-template", "template file for godb.go")
 	// list psql reserved words...
 	replace_sql = map[string]string{
-		"value":  "r_value",
-		"table":  "r_table",
-		"where":  "r_where",
-		"binary": "r_binary",
-		"public": "r_public",
+		"value":     "r_value",
+		"table":     "r_table",
+		"where":     "r_where",
+		"binary":    "r_binary",
+		"public":    "r_public",
+		"timestamp": "r_timestamp",
 	}
 )
 
