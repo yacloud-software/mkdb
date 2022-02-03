@@ -290,6 +290,11 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 		if exists {
 			l = rpl
 		}
+		gotname, newname := c.GetOpt(f, "(common.sql_name)")
+		if gotname {
+			fmt.Printf("Name overriden. Field \"%s\" becomes \"%s\"\n", l, newname)
+			l = newname
+		}
 		c.fieldcols[fname] = l
 	}
 

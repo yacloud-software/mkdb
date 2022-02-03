@@ -285,7 +285,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 			}
 		}
 		pf := &pb.ProtoField{Options: opts, Name: x.Name, Type: t, PrimaryKey: pk}
-		def.Fields = append(def.Fields, pf)
+		def.Fields = append(def.Fields, pf) // add the name to the list
 
 		//		fmt.Printf("   %s %s (%d)\n", x.Name, x.Type, t)
 	}
