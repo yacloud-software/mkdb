@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/emicklei/proto v1.11.1
 	golang.conradwood.net/apis/mkdb v1.1.1417
-	golang.conradwood.net/go-easyops v0.1.15450
+	golang.conradwood.net/go-easyops v0.1.15769
 	google.golang.org/grpc v1.52.0
 )
 
@@ -24,7 +24,7 @@ require (
 	golang.conradwood.net/apis/common v1.1.2105 // indirect
 	golang.conradwood.net/apis/deploymonkey v1.1.2105 // indirect
 	golang.conradwood.net/apis/echoservice v1.1.2105 // indirect
-	golang.conradwood.net/apis/errorlogger v1.1.2105 // indirect
+	golang.conradwood.net/apis/errorlogger v1.1.2125 // indirect
 	golang.conradwood.net/apis/framework v1.1.2105 // indirect
 	golang.conradwood.net/apis/goeasyops v1.1.2105 // indirect
 	golang.conradwood.net/apis/objectstore v1.1.2105 // indirect
