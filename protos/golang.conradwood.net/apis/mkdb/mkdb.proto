@@ -43,6 +43,13 @@ message CreateDBRequest {
 message CreateDBResponse {
   string GoFile = 1; // save this to a .go file and compile it..
 }
+
+// save all files under ../db/
+message FileStream {
+  string Filename=1; // filename to save this under
+  bytes Data=2; // the data for this file. might come in "parts", that is a filename may have multiple Data packets
+}
+
 /*
 the mkdb (short for make database) will create basic accessors for a database, based on a single input protobuf.
 It will create tabledefinitions and sql statements to store and delete the protobuf. To facilitate retrieval of the proto it will create basic "Getters" for each field. If the protobuf defines a field called 'ID' of type uint64 it will also create a Getter to retrieve a single proto by ID.
@@ -52,4 +59,7 @@ service MKDB {
   rpc GetMessages(GetMessagesRequest) returns (GetMessageResponse);
   // given a protofile and a message name will return Database Accessor helpers in a .go source file
   rpc CreateDBFile(CreateDBRequest) returns (CreateDBResponse);
+  // a newer improved version which includes multiple files being generated
+  rpc CreateDBFiles(CreateDBRequest) returns (stream FileStream);
+
 }
