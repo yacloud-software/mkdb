@@ -55,7 +55,7 @@ message Page {
   uint64 ID=1;
   Image Image=2 [(common.sql_type)="uint64"]; // may be nul if we did not ask for it
   string TextContent=3; // text on this page
-  common.Language Language=4 [(common.sql_type)="uint32"]; // most commonly found language on this page
+  common.Language Language=4 [(common.sql_type)="uint32"]; // enum: most commonly found language on this page
 }
 
 // one may create a foreign key:
