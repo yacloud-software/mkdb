@@ -1,8 +1,15 @@
 // client create: MKDBClient
+/*
+  Created by /home/cnw/devel/go/go-tools/src/golang.conradwood.net/gotools/protoc-gen-cnw/protoc-gen-cnw.go
+*/
+
 /* geninfo:
    filename  : protos/golang.conradwood.net/apis/mkdb/mkdb.proto
    gopackage : golang.conradwood.net/apis/mkdb
    importname: ai_0
+   clientfunc: GetMKDB
+   serverfunc: NewMKDB
+   lookupfunc: MKDBLookupID
    varname   : client_MKDBClient_0
    clientname: MKDBClient
    servername: MKDBServer
@@ -33,8 +40,9 @@ func GetMKDBClient() MKDBClient {
        return client_MKDBClient_0
     }
 
-    client_MKDBClient_0 = NewMKDBClient(client.Connect("mkdb.MKDB"))
+    client_MKDBClient_0 = NewMKDBClient(client.Connect(MKDBLookupID()))
     lock_MKDBClient_0.Unlock()
     return client_MKDBClient_0
 }
 
+func MKDBLookupID() string { return "mkdb.MKDB" } // returns the ID suitable for lookup in the registry. treat as opaque, subject to change.
