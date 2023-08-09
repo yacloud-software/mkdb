@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/emicklei/proto"
 	pb "golang.conradwood.net/apis/mkdb"
+	"golang.conradwood.net/go-easyops/cmdline"
 	"golang.conradwood.net/go-easyops/errors"
 	"golang.conradwood.net/go-easyops/server"
 	"golang.conradwood.net/go-easyops/utils"
@@ -310,7 +311,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 		return
 	}
 	gof := creator.DBGo()
-	res, err := linux.SafelyExecute([]string{"/opt/yacloud/ctools/dev/go/current/go/bin/gofmt"}, strings.NewReader(gof))
+	res, err := linux.SafelyExecute([]string{cmdline.GetYACloudDir() + "/ctools/dev/go/current/go/bin/gofmt"}, strings.NewReader(gof))
 	if err != nil {
 		fmt.Printf("gofmt failed:\n%s\n", gof)
 		if *save_fail {
