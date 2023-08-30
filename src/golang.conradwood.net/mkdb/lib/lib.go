@@ -303,12 +303,16 @@ func (c *Creator) t_col_sqldef(name string) string {
 			// if alter table default columns are off - insert here
 			if f.Type == 5 {
 				return `''`
+			} else if f.Type == 10 {
+				return `''`
 			} else if f.Type == 6 {
 				return `false`
+			} else if f.Type == 3 || f.Type == 4 || f.Type == 9 {
+				return `0`
 			} else if f.Type == 2 || f.Type == 11 {
 				return `0.0`
 			} else {
-				return `0`
+				return fmt.Sprintf("TODO_MKDB_SQLTYPE(%d)", f.Type)
 			}
 		}
 	}
