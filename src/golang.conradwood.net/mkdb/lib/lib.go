@@ -2,6 +2,8 @@ package lib
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"golang.conradwood.net/apis/mkdb"
@@ -58,6 +60,72 @@ func t_deli(i int, s string) string {
 		return s
 	}
 	return ""
+}
+
+/*
+create the foreignkeys
+*/
+func (c *Creator) create_foreign_keys() []string {
+	var res []string
+	for _, f := range c.Def.Fields {
+		found, ref, reff := c.GetOptSQLReference(f)
+		if !found {
+			continue
+		}
+		col_name := c.t_col_name(f.Name)
+		constraint_name := "fk_" + hash(c.TableName+"_"+col_name+"_"+ref+reff)
+		s := fmt.Sprintf("add constraint %s FOREIGN KEY (%s) references %s (%s) on delete cascade ", constraint_name, col_name, ref, reff)
+
+		if c.GetOptSQLUnique(f) {
+			s = s + " unique "
+		}
+		res = append(res, s)
+	}
+	return res
+}
+
+/*
+create the indices - TODO
+*/
+func (c *Creator) create_indices() []string {
+	var res []string
+	for _, f := range c.Def.Fields {
+		found := c.GetOptSQLUnique(f)
+		if !found {
+			continue
+		}
+		col_name := c.t_col_name(f.Name)
+		constraint_name := "uniq_" + hash(c.TableName+"_"+col_name)
+		s := fmt.Sprintf("create unique index if not exists %s on %s (%s)", constraint_name, c.TableName, col_name)
+		res = append(res, s)
+		s = fmt.Sprintf("alter table %s add constraint %s unique using index %s", c.TableName, constraint_name, constraint_name)
+		res = append(res, s)
+	}
+	return res
+
+}
+func hash(s string) string {
+	if len(s) < 64 {
+		//valid sqlname
+		validchars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+		res := ""
+		for _, c := range s {
+			valid := false
+			for _, cv := range validchars {
+				if cv == c {
+					valid = true
+					break
+				}
+			}
+			if !valid {
+				c = '_'
+			}
+			res = res + string(c)
+		}
+		return res
+	}
+	h := md5.Sum([]byte(s))
+	return hex.EncodeToString(h[:])
 }
 
 /*
@@ -228,7 +296,7 @@ func (c *Creator) t_col_sqltype(name string) string {
 	return fmt.Sprintf("UNKNOWN SQL (%s)", name)
 }
 
-// given a column name will return a valid sql default for this column, e.g. '' for string and 0 for int
+// given a column name will return a valid sql default for this column, e.g. ” for string and 0 for int
 func (c *Creator) t_col_sqldef(name string) string {
 	for _, f := range c.Def.Fields {
 		if c.t_col_name(f.Name) == name || c.t_col_name(c.GetFieldName(f)) == name {
@@ -301,22 +369,24 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 	c.Def = def
 	t := template.New("foo")
 	t.Funcs(template.FuncMap{
-		"inc":               t_inc,
-		"inc2":              t_inc2,
-		"deli":              t_deli,
-		"id_col":            c.t_id_col,
-		"id_field":          c.t_id_field,
-		"cols_no_id":        c.t_cols_no_id,
-		"col_name":          c.t_col_name,
-		"col_sqltype":       c.t_col_sqltype,
-		"col_extraopts":     c.t_col_extraopts,
-		"col_sqldef":        c.t_col_sqldef,
-		"fields_no_id":      c.t_fields_no_id,
-		"fieldvalues_no_id": c.t_fieldvalues_no_id,
-		"field_count":       c.t_field_count,
-		"field_gotype":      c.t_field_go_type,
-		"id_null":           c.t_id_null,
-		"msgInitializers":   c.msgInitializers,
+		"inc":                 t_inc,
+		"inc2":                t_inc2,
+		"deli":                t_deli,
+		"id_col":              c.t_id_col,
+		"id_field":            c.t_id_field,
+		"cols_no_id":          c.t_cols_no_id,
+		"col_name":            c.t_col_name,
+		"col_sqltype":         c.t_col_sqltype,
+		"col_extraopts":       c.t_col_extraopts,
+		"col_sqldef":          c.t_col_sqldef,
+		"fields_no_id":        c.t_fields_no_id,
+		"fieldvalues_no_id":   c.t_fieldvalues_no_id,
+		"field_count":         c.t_field_count,
+		"field_gotype":        c.t_field_go_type,
+		"id_null":             c.t_id_null,
+		"msgInitializers":     c.msgInitializers,
+		"create_foreign_keys": c.create_foreign_keys,
+		"create_indices":      c.create_indices,
 	})
 	foo, err := utils.ReadFile(*tmplfile)
 	if err != nil {
