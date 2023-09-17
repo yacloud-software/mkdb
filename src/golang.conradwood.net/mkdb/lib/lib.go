@@ -307,7 +307,7 @@ func (c *Creator) t_col_sqldef(name string) string {
 				return `''`
 			} else if f.Type == 6 {
 				return `false`
-			} else if f.Type == 3 || f.Type == 4 || f.Type == 9 {
+			} else if f.Type == 3 || f.Type == 4 || f.Type == 9 || f.Type == 7 || f.Type == 8 {
 				return `0`
 			} else if f.Type == 2 || f.Type == 11 {
 				return `0.0`
