@@ -48,14 +48,14 @@ func NewCreator() *Creator {
 	return res
 }
 
-func t_inc2(i int) int {
+func T_inc2(i int) int {
 	return i + 2
 }
 
-func t_inc(i int) int {
+func T_inc(i int) int {
 	return i + 1
 }
-func t_deli(i int, s string) string {
+func T_deli(i int, s string) string {
 	if i != 0 {
 		return s
 	}
@@ -70,11 +70,14 @@ func (c *Creator) create_foreign_keys() []string {
 	for _, f := range c.Def.Fields {
 		found, ref, reff := c.GetOptSQLReference(f)
 		if !found {
-			continue
+			found, ref, reff = c.GetOptSQLNullReference(f)
+			if !found {
+				continue
+			}
 		}
-		col_name := c.t_col_name(f.Name)
-		constraint_name := "fk_" + hash(c.TableName+"_"+col_name+"_"+ref+reff)
-		s := fmt.Sprintf("add constraint %s FOREIGN KEY (%s) references %s (%s) on delete cascade ", constraint_name, col_name, ref, reff)
+		col_name := c.T_col_name(f.Name)
+		constrainT_name := "fk_" + hash(c.TableName+"_"+col_name+"_"+ref+reff)
+		s := fmt.Sprintf("add constraint %s FOREIGN KEY (%s) references %s (%s) on delete cascade ", constrainT_name, col_name, ref, reff)
 
 		if c.GetOptSQLUnique(f) {
 			s = s + " unique "
@@ -94,11 +97,11 @@ func (c *Creator) create_indices() []string {
 		if !found {
 			continue
 		}
-		col_name := c.t_col_name(f.Name)
-		constraint_name := "uniq_" + hash(c.TableName+"_"+col_name)
-		s := fmt.Sprintf("create unique index if not exists %s on %s (%s)", constraint_name, c.TableName, col_name)
+		col_name := c.T_col_name(f.Name)
+		constrainT_name := "uniq_" + hash(c.TableName+"_"+col_name)
+		s := fmt.Sprintf("create unique index if not exists %s on %s (%s)", constrainT_name, c.TableName, col_name)
 		res = append(res, s)
-		s = fmt.Sprintf("alter table %s add constraint %s unique using index %s", c.TableName, constraint_name, constraint_name)
+		s = fmt.Sprintf("alter table %s add constraint %s unique using index %s", c.TableName, constrainT_name, constrainT_name)
 		res = append(res, s)
 	}
 	return res
@@ -149,16 +152,16 @@ func (c *Creator) msgInitializers() string {
 }
 
 // return column names WITHOUT id
-func (c *Creator) t_cols_no_id() []string {
+func (c *Creator) T_cols_no_id() []string {
 	var res []string
-	for _, f := range c.t_fields_no_id() {
+	for _, f := range c.T_fields_no_id() {
 		res = append(res, c.fieldcols[f])
 	}
 	return res
 }
 
 // return field names WITHOUT id
-func (c *Creator) t_fields_no_id() []string {
+func (c *Creator) T_fields_no_id() []string {
 	var res []string
 	for _, f := range c.Def.Fields {
 		if f.PrimaryKey {
@@ -171,7 +174,7 @@ func (c *Creator) t_fields_no_id() []string {
 }
 
 // return field names WITHOUT id
-func (c *Creator) t_fieldvalues_no_id() []string {
+func (c *Creator) T_fieldvalues_no_id() []string {
 	var res []string
 	for _, f := range c.Def.Fields {
 		if f.PrimaryKey {
@@ -193,15 +196,19 @@ func (c *Creator) GetFieldValueName(f *mkdb.ProtoField) string {
 	if b {
 		return fmt.Sprintf("%s.ID", f.Name)
 	}
+	b, _, _ = c.GetOptSQLNullReference(f)
+	if b {
+		return fmt.Sprintf("%s.ID", f.Name)
+	}
 	return f.Name
 }
-func (c *Creator) t_id_col() string {
+func (c *Creator) T_id_col() string {
 	return strings.ToLower(c.IDField)
 }
 
 // returns a go representation of an empty object matching the ID field's type.
 // e.g. "" for string and 0 for int
-func (c *Creator) t_id_null() string {
+func (c *Creator) T_id_null() string {
 	for _, f := range c.Def.Fields {
 		if !f.PrimaryKey {
 			continue
@@ -219,7 +226,7 @@ func (c *Creator) t_id_null() string {
 
 }
 
-func (c *Creator) t_id_field() string {
+func (c *Creator) T_id_field() string {
 	for _, f := range c.Def.Fields {
 		if f.Type == 1 {
 			return f.Name
@@ -229,7 +236,7 @@ func (c *Creator) t_id_field() string {
 }
 
 // given a fieldname, will convert to column name
-func (c *Creator) t_col_name(fieldname string) string {
+func (c *Creator) T_col_name(fieldname string) string {
 	s, found := c.fieldcols[fieldname]
 	if !found && *debug {
 		for k, v := range c.fieldcols {
@@ -240,7 +247,7 @@ func (c *Creator) t_col_name(fieldname string) string {
 	return s
 }
 
-func (c *Creator) t_field_count() int {
+func (c *Creator) T_field_count() int {
 	return len(c.Def.Fields)
 }
 
@@ -259,14 +266,36 @@ func (c *Creator) colNameToField(colname string) *mkdb.ProtoField {
 	return nil
 }
 
+// returns empty string or the string "not null"
+func (c *Creator) T_col_notnull(name string) string {
+	for _, f := range c.Def.Fields {
+		if c.T_col_name(f.Name) != name {
+			continue
+		}
+		// if it has nullreference tag, then don't add "not null"
+		found, _, _ := c.GetOptSQLNullReference(f)
+		if found {
+			return ""
+		}
+		break
+	}
+
+	return "not null"
+
+}
+
 // given a column name will return extra create options
-func (c *Creator) t_col_extraopts(name string) string {
+func (c *Creator) T_col_extraopts(name string) string {
 	res := ""
 	for _, f := range c.Def.Fields {
-		if c.t_col_name(f.Name) != name {
+		if c.T_col_name(f.Name) != name {
 			continue
 		}
 		found, ref, reff := c.GetOptSQLReference(f)
+		if found {
+			res = res + fmt.Sprintf(" references %s (%s) on delete cascade ", ref, reff)
+		}
+		found, ref, reff = c.GetOptSQLNullReference(f)
 		if found {
 			res = res + fmt.Sprintf(" references %s (%s) on delete cascade ", ref, reff)
 		}
@@ -281,12 +310,12 @@ func (c *Creator) t_col_extraopts(name string) string {
 }
 
 // given a column name will return sql type
-func (c *Creator) t_col_sqltype(name string) string {
+func (c *Creator) T_col_sqltype(name string) string {
 	for _, f := range c.Def.Fields {
-		if c.t_col_name(f.Name) == name {
+		if c.T_col_name(f.Name) == name {
 			return to_sql_string(f.Type)
 		}
-		if c.t_col_name(c.GetFieldName(f)) == name {
+		if c.T_col_name(c.GetFieldName(f)) == name {
 			return to_sql_string(f.Type)
 		}
 	}
@@ -297,9 +326,9 @@ func (c *Creator) t_col_sqltype(name string) string {
 }
 
 // given a column name will return a valid sql default for this column, e.g. ” for string and 0 for int
-func (c *Creator) t_col_sqldef(name string) string {
+func (c *Creator) T_col_sqldef(name string) string {
 	for _, f := range c.Def.Fields {
-		if c.t_col_name(f.Name) == name || c.t_col_name(c.GetFieldName(f)) == name {
+		if c.T_col_name(f.Name) == name || c.T_col_name(c.GetFieldName(f)) == name {
 			// if alter table default columns are off - insert here
 			if f.Type == 5 {
 				return `''`
@@ -323,7 +352,7 @@ func (c *Creator) t_col_sqldef(name string) string {
 }
 
 // return the field "go type" (e.g. "int" or "uint64" or "double")
-func (c *Creator) t_field_go_type(name string) string {
+func (c *Creator) T_field_go_type(name string) string {
 	if name == "" {
 		panic("Attempt to resolve name with zero length")
 	}
@@ -373,21 +402,23 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 	c.Def = def
 	t := template.New("foo")
 	t.Funcs(template.FuncMap{
-		"inc":                 t_inc,
-		"inc2":                t_inc2,
-		"deli":                t_deli,
-		"id_col":              c.t_id_col,
-		"id_field":            c.t_id_field,
-		"cols_no_id":          c.t_cols_no_id,
-		"col_name":            c.t_col_name,
-		"col_sqltype":         c.t_col_sqltype,
-		"col_extraopts":       c.t_col_extraopts,
-		"col_sqldef":          c.t_col_sqldef,
-		"fields_no_id":        c.t_fields_no_id,
-		"fieldvalues_no_id":   c.t_fieldvalues_no_id,
-		"field_count":         c.t_field_count,
-		"field_gotype":        c.t_field_go_type,
-		"id_null":             c.t_id_null,
+		"inc":                 T_inc,
+		"inc2":                T_inc2,
+		"deli":                T_deli,
+		"id_col":              c.T_id_col,
+		"id_field":            c.T_id_field,
+		"cols_no_id":          c.T_cols_no_id,
+		"col_name":            c.T_col_name,
+		"col_notnull":         c.T_col_notnull,
+		"col_sqltype":         c.T_col_sqltype,
+		"col_extraopts":       c.T_col_extraopts,
+		"col_sqldef":          c.T_col_sqldef,
+		"fields_no_id":        c.T_fields_no_id,
+		"scanner":             c.T_scanner,
+		"fieldvalues_no_id":   c.T_fieldvalues_no_id,
+		"field_count":         c.T_field_count,
+		"field_gotype":        c.T_field_go_type,
+		"id_null":             c.T_id_null,
 		"msgInitializers":     c.msgInitializers,
 		"create_foreign_keys": c.create_foreign_keys,
 		"create_indices":      c.create_indices,
@@ -400,11 +431,11 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 	if err != nil {
 		return err
 	}
-	if c.t_id_col() == "" {
+	if c.T_id_col() == "" {
 		return fmt.Errorf("Unable to determine or find ID Column. Configured: \"%s\"", c.IDField)
 	}
 	var w bytes.Buffer
-	fmt.Printf("Primary ID: %s\n", c.t_id_col())
+	fmt.Printf("Primary ID: %s\n", c.T_id_col())
 	err = templ.Execute(&w, c)
 	if err != nil {
 		return err

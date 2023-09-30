@@ -234,6 +234,8 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 				ignore = true
 			} else if o.Name == "(common.sql_reference)" {
 				fmt.Printf("SQL_Reference for \"%s\": \"%s\"\n", x.Name, o.Constant.Source)
+			} else if o.Name == "(common.sql_nullreference)" {
+				fmt.Printf("SQL_NullReference for \"%s\": \"%s\"\n", x.Name, o.Constant.Source)
 			} else {
 				fmt.Printf("Option for %s: %#v\n", x.Name, o)
 			}

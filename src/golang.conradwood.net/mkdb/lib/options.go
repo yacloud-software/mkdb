@@ -33,3 +33,16 @@ func (c *Creator) GetOptSQLReference(field *mkdb.ProtoField) (bool, string, stri
 	}
 	return true, kv[0], kv[1]
 }
+
+// of sql_reference: get key and value
+func (c *Creator) GetOptSQLNullReference(field *mkdb.ProtoField) (bool, string, string) {
+	found, s := c.GetOpt(field, "(common.sql_nullreference)")
+	if !found {
+		return false, "", ""
+	}
+	kv := strings.Split(s, ".")
+	if len(kv) != 2 {
+		return true, fmt.Sprintf("INVALID REFERENCE: \"%s\"", s), fmt.Sprintf("INVALID REFERENCE: \"%s\"", s)
+	}
+	return true, kv[0], kv[1]
+}
