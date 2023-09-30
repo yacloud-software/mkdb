@@ -76,7 +76,7 @@ func (c *Creator) create_foreign_keys() []string {
 			}
 		}
 		col_name := c.T_col_name(f.Name)
-		constrainT_name := "fk_" + hash(c.TableName+"_"+col_name+"_"+ref+reff)
+		constrainT_name := "mkdb_fk_" + hash(c.TableName+"_"+col_name+"_"+ref+reff)
 		s := fmt.Sprintf("add constraint %s FOREIGN KEY (%s) references %s (%s) on delete cascade ", constrainT_name, col_name, ref, reff)
 
 		if c.GetOptSQLUnique(f) {
@@ -110,7 +110,7 @@ func (c *Creator) create_indices() []string {
 func hash(s string) string {
 	if len(s) < 64 {
 		//valid sqlname
-		validchars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+		validchars := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 		res := ""
 		for _, c := range s {
 			valid := false
