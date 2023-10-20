@@ -49,4 +49,5 @@ func MKDBLookupID() string { return "mkdb.MKDB" } // returns the ID suitable for
 
 func init() {
    client.RegisterDependency("mkdb.MKDB")
+   AddService("mkdb.MKDB")
 }
