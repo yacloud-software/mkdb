@@ -457,3 +457,4 @@ func (c *Creator) buildinsert(vals map[string]string) string {
 	s := "db.insert into " + c.TableName + " ("
 	return s
 }
+

@@ -31,13 +31,13 @@ func main() {
 	flag.Parse()
 	sd := server.NewServerDef()
 	sd.SetPort(*port)
-	sd.Register = server.Register(
+	sd.SetRegister(server.Register(
 		func(server *grpc.Server) error {
 			e := new(echoServer)
 			pb.RegisterMKDBServer(server, e)
 			return nil
 		},
-	)
+	))
 	err := server.ServerStartup(sd)
 	utils.Bail("Unable to start server", err)
 	os.Exit(0)
@@ -370,3 +370,4 @@ func comment(field *proto.NormalField) string {
 	}
 	return ""
 }
+

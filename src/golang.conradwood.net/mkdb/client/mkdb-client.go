@@ -215,3 +215,4 @@ func handleMessage(m *proto.Message) {
 	linux.SafelyExecute([]string{"gofmt", "-w", fname}, nil)
 
 }
+

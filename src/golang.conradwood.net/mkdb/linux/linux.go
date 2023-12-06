@@ -93,3 +93,4 @@ func printOutput(cmd string, output string) {
 	fmt.Printf("%s\n", output)
 	fmt.Printf("====END OUTPUT OF %s====\n", cmd)
 }
+

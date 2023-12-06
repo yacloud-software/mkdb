@@ -46,3 +46,4 @@ func (c *Creator) GetOptSQLNullReference(field *mkdb.ProtoField) (bool, string, 
 	}
 	return true, kv[0], kv[1]
 }
+
