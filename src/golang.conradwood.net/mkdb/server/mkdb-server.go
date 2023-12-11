@@ -371,3 +371,4 @@ func comment(field *proto.NormalField) string {
 	return ""
 }
 
+
