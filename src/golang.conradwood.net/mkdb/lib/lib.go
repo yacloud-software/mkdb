@@ -23,6 +23,7 @@ var (
 		"binary":    "r_binary",
 		"public":    "r_public",
 		"timestamp": "r_timestamp",
+		"end":       "r_end",
 	}
 )
 
@@ -457,7 +458,3 @@ func (c *Creator) buildinsert(vals map[string]string) string {
 	s := "db.insert into " + c.TableName + " ("
 	return s
 }
-
-
-
-
