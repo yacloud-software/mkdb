@@ -6,7 +6,7 @@ import (
 	"github.com/emicklei/proto"
 	"golang.conradwood.net/apis/mkdb"
 	"golang.conradwood.net/go-easyops/authremote"
-	"golang.conradwood.net/go-easyops/client"
+	//	"golang.conradwood.net/go-easyops/client"
 	"golang.conradwood.net/go-easyops/utils"
 	"golang.conradwood.net/mkdb/lib"
 	"golang.conradwood.net/mkdb/linux"
@@ -36,7 +36,7 @@ var (
 func main() {
 	flag.Parse()
 
-	mclient = mkdb.NewMKDBClient(client.Connect("mkdb.MKDB"))
+	mclient = mkdb.GetMKDBClient()
 
 	if *proto_file == "" {
 		fmt.Printf("Missing -protofile\n")
@@ -215,7 +215,3 @@ func handleMessage(m *proto.Message) {
 	linux.SafelyExecute([]string{"gofmt", "-w", fname}, nil)
 
 }
-
-
-
-
