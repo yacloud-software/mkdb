@@ -78,7 +78,10 @@ message Foo {
  Bar BarObject=1 [(common.sql_name)="foocolumnname"];
 }
 
-
+// a field may be null (especially useful for embedded protos)
+message Foo {
+ Bar BarObject=1 [(common.sql_nullable)="true",(common.sql_type)="uint64"]; // may be nul if we did not ask for it
+}
 
 
 
