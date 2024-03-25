@@ -186,6 +186,55 @@ func (c *Creator) T_fieldvalues_no_id() []string {
 	return res
 }
 
+// return names of getters for all fields except the id
+func (c *Creator) T_fieldvalue_getters_no_id() []string {
+	var res []string
+	for _, s := range c.T_fieldvalues_no_id() {
+		sg := "get_" + s
+		sg = strings.ReplaceAll(sg, ".", "_")
+		res = append(res, sg)
+	}
+
+	return res
+}
+
+// return names of getters for all fields except the id
+// TODO: honour NULLABLE tag
+func (c *Creator) T_all_getters_code() []string {
+	var res []string
+	for _, f := range c.Def.Fields {
+		s := c.GetFieldValueName(f)
+		go_sql_typ := c.T_field_go_type(c.GetFieldValueName(f))
+		is_reference := strings.Contains(s, ".")
+		s = strings.ReplaceAll(s, ".", "_")
+		ret := `return p.` + c.GetFieldValueName(f)
+
+		if is_reference {
+			sx := c.GetFieldValueName(f)
+			ref := strings.SplitN(sx, ".", 2)[0]
+			if c.IsNullable(f) {
+				// is a reference to another proto
+				go_sql_typ = "gosql.NullInt64"
+				ret = "if p." + ref + "==nil { return gosql.NullInt64{Valid:false} }\n"
+				ret = ret + "return gosql.NullInt64{Valid:true,Int64:int64( p." + sx + " ) }"
+			} else {
+				ret = "if p." + ref + `==nil { panic("field ` + ref + ` must not be nil") }
+`
+				ret = ret + `return p.` + c.GetFieldValueName(f)
+				go_sql_typ = "uint64"
+			}
+		}
+
+		sg := `func (a *` + c.Structname + `) get_` + s + `(p *savepb.` + c.Def.Name + `) ` + go_sql_typ + ` {
+ ` + ret + `
+}
+`
+		res = append(res, sg)
+	}
+
+	return res
+}
+
 // return the field name
 func (c *Creator) GetFieldName(f *mkdb.ProtoField) string {
 	return f.Name
@@ -352,7 +401,7 @@ func (c *Creator) T_col_sqldef(name string) string {
 	return fmt.Sprintf("UNKNOWN SQL (%s)", name)
 }
 
-// return the field "go type" (e.g. "int" or "uint64" or "double")
+// given the fieldname, return the field "go type" (e.g. "int" or "uint64" or "double")
 func (c *Creator) T_field_go_type(name string) string {
 	if name == "" {
 		panic("Attempt to resolve name with zero length")
@@ -403,26 +452,28 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 	c.Def = def
 	t := template.New("foo")
 	t.Funcs(template.FuncMap{
-		"inc":                 T_inc,
-		"inc2":                T_inc2,
-		"deli":                T_deli,
-		"id_col":              c.T_id_col,
-		"id_field":            c.T_id_field,
-		"cols_no_id":          c.T_cols_no_id,
-		"col_name":            c.T_col_name,
-		"col_notnull":         c.T_col_notnull,
-		"col_sqltype":         c.T_col_sqltype,
-		"col_extraopts":       c.T_col_extraopts,
-		"col_sqldef":          c.T_col_sqldef,
-		"fields_no_id":        c.T_fields_no_id,
-		"scanner":             c.T_scanner,
-		"fieldvalues_no_id":   c.T_fieldvalues_no_id,
-		"field_count":         c.T_field_count,
-		"field_gotype":        c.T_field_go_type,
-		"id_null":             c.T_id_null,
-		"msgInitializers":     c.msgInitializers,
-		"create_foreign_keys": c.create_foreign_keys,
-		"create_indices":      c.create_indices,
+		"inc":                      T_inc,
+		"inc2":                     T_inc2,
+		"deli":                     T_deli,
+		"id_col":                   c.T_id_col,
+		"id_field":                 c.T_id_field,
+		"cols_no_id":               c.T_cols_no_id,
+		"col_name":                 c.T_col_name,
+		"col_notnull":              c.T_col_notnull,
+		"col_sqltype":              c.T_col_sqltype,
+		"col_extraopts":            c.T_col_extraopts,
+		"col_sqldef":               c.T_col_sqldef,
+		"fields_no_id":             c.T_fields_no_id,
+		"scanner":                  c.T_scanner,
+		"fieldvalues_no_id":        c.T_fieldvalues_no_id,
+		"all_getters_code":         c.T_all_getters_code,
+		"fieldvalue_getters_no_id": c.T_fieldvalue_getters_no_id,
+		"field_count":              c.T_field_count,
+		"field_gotype":             c.T_field_go_type,
+		"id_null":                  c.T_id_null,
+		"msgInitializers":          c.msgInitializers,
+		"create_foreign_keys":      c.create_foreign_keys,
+		"create_indices":           c.create_indices,
 	})
 	foo, err := utils.ReadFile(*tmplfile)
 	if err != nil {

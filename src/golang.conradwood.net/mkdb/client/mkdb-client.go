@@ -120,6 +120,7 @@ func MultipleFiles(content []byte) error {
 		if err == io.EOF {
 			break
 		}
+		utils.Bail("failed to create", err)
 	}
 	for filename, content := range new_content {
 		fname := dir + "/" + filename

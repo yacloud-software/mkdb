@@ -12,6 +12,7 @@ type create_nullable_fields struct {
 	fieldintargetname string // e.g. "ID" (refers to targetname not create), so we can fmt.Sprintf("%s.%s=%s.Value()",targetname,fieldintargetname,varname)
 }
 
+// the code to actually _scan_ a row and return the proto "foo"
 // must create code to return "foo" and "err"
 func (c *Creator) T_scanner() string {
 	res := `foo := &savepb.` + c.Def.Name + "{}\n"
@@ -100,7 +101,3 @@ func (c *Creator) IsReference(f *mkdb.ProtoField) bool {
 	}
 	return false
 }
-
-
-
-
