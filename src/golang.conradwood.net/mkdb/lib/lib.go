@@ -205,11 +205,13 @@ func (c *Creator) T_all_getters_code() []string {
 	for _, f := range c.Def.Fields {
 		s := c.GetFieldValueName(f)
 		go_sql_typ := c.T_field_go_type(c.GetFieldValueName(f))
+		comt := "// getter for field \"" + f.Name + "\" (" + s + ") [" + go_sql_typ + "] \n"
 		is_reference := strings.Contains(s, ".")
 		s = strings.ReplaceAll(s, ".", "_")
-		ret := `return p.` + c.GetFieldValueName(f)
+		ret := `return ` + go_sql_typ + ` (p.` + c.GetFieldValueName(f) + ")"
 
 		if is_reference {
+			comt = "// getter for reference \"" + f.Name + "\"\n"
 			sx := c.GetFieldValueName(f)
 			ref := strings.SplitN(sx, ".", 2)[0]
 			if c.IsNullable(f) {
@@ -225,7 +227,7 @@ func (c *Creator) T_all_getters_code() []string {
 			}
 		}
 
-		sg := `func (a *` + c.Structname + `) get_` + s + `(p *savepb.` + c.Def.Name + `) ` + go_sql_typ + ` {
+		sg := comt + `func (a *` + c.Structname + `) get_` + s + `(p *savepb.` + c.Def.Name + `) ` + go_sql_typ + ` {
  ` + ret + `
 }
 `
