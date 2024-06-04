@@ -5,7 +5,7 @@ go 1.21.1
 require (
 	github.com/emicklei/proto v1.13.2
 	golang.conradwood.net/apis/mkdb v1.1.1417
-	golang.conradwood.net/go-easyops v0.1.27845
+	golang.conradwood.net/go-easyops v0.1.27983
 	google.golang.org/grpc v1.63.2
 )
 
@@ -21,14 +21,14 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.52.3 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
-	golang.conradwood.net/apis/auth v1.1.2931 // indirect
+	golang.conradwood.net/apis/auth v1.1.2933 // indirect
 	golang.conradwood.net/apis/autodeployer v1.1.2905 // indirect
-	golang.conradwood.net/apis/common v1.1.2931 // indirect
+	golang.conradwood.net/apis/common v1.1.2933 // indirect
 	golang.conradwood.net/apis/deploymonkey v1.1.2905 // indirect
 	golang.conradwood.net/apis/echoservice v1.1.2905 // indirect
 	golang.conradwood.net/apis/errorlogger v1.1.2905 // indirect
 	golang.conradwood.net/apis/framework v1.1.2905 // indirect
-	golang.conradwood.net/apis/goeasyops v1.1.2931 // indirect
+	golang.conradwood.net/apis/goeasyops v1.1.2933 // indirect
 	golang.conradwood.net/apis/grafanadata v1.1.2905 // indirect
 	golang.conradwood.net/apis/objectstore v1.1.2905 // indirect
 	golang.conradwood.net/apis/registry v1.1.2905 // indirect
@@ -37,7 +37,7 @@ require (
 	golang.org/x/text v0.15.0 // indirect
 	golang.yacloud.eu/apis/autodeployer2 v1.1.2905 // indirect
 	golang.yacloud.eu/apis/fscache v1.1.2905 // indirect
-	golang.yacloud.eu/apis/session v1.1.2931 // indirect
+	golang.yacloud.eu/apis/session v1.1.2933 // indirect
 	golang.yacloud.eu/apis/unixipc v1.1.2905 // indirect
 	golang.yacloud.eu/apis/urlcacher v1.1.2905 // indirect
 	golang.yacloud.eu/unixipc v0.1.26852 // indirect
