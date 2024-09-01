@@ -7,7 +7,7 @@ toolchain go1.22.2
 require (
 	github.com/emicklei/proto v1.13.2
 	golang.conradwood.net/apis/mkdb v1.1.1417
-	golang.conradwood.net/go-easyops v0.1.28515
+	golang.conradwood.net/go-easyops v0.1.29130
 	google.golang.org/grpc v1.65.0
 )
 
