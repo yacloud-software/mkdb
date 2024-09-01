@@ -92,7 +92,7 @@ func MultipleFiles(content []byte) error {
 	}
 
 	os.MkdirAll(dir, 0777)
-	fmt.Printf("Writing files to %s\n", dir)
+	fmt.Printf("Writing files for \"%s\" to %s\n", *message, dir)
 
 	ctx := authremote.Context()
 	cr := &mkdb.CreateDBRequest{

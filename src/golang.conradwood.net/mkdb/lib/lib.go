@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"golang.conradwood.net/apis/mkdb"
+	"golang.conradwood.net/go-easyops/errors"
 	"golang.conradwood.net/go-easyops/utils"
 	"strings"
 	"text/template"
@@ -423,19 +424,19 @@ func (c *Creator) T_field_go_type(name string) string {
 		}
 	*/
 	if *debug {
-		panic(fmt.Sprintf("no type for unknown field \"%s\"", name))
+		fmt.Printf("no type for unknown field \"%s\"", name)
 	}
 	return fmt.Sprintf("UNKNOWN[%s]", name)
 }
 
 func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 	if c.IDField == "" {
-		return fmt.Errorf("No IDField configured")
+		return errors.Errorf("No IDField configured")
 	}
 	c.fieldcols = make(map[string]string)
 	for _, f := range def.Fields {
 		if f.Name == "" {
-			return fmt.Errorf("Fields may not contain entries without a name")
+			return errors.Errorf("Fields may not contain entries without a name")
 		}
 		fname := c.GetFieldName(f)
 		l := strings.ToLower(fname)
@@ -452,7 +453,7 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 	}
 
 	c.Def = def
-	t := template.New("foo")
+	t := template.New("mkdb_lib_template")
 	t.Funcs(template.FuncMap{
 		"inc":                      T_inc,
 		"inc2":                     T_inc2,
@@ -486,7 +487,7 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 		return err
 	}
 	if c.T_id_col() == "" {
-		return fmt.Errorf("Unable to determine or find ID Column. Configured: \"%s\"", c.IDField)
+		return errors.Errorf("Unable to determine or find ID Column. Configured: \"%s\"", c.IDField)
 	}
 	var w bytes.Buffer
 	fmt.Printf("Primary ID: %s\n", c.T_id_col())

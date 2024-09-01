@@ -68,6 +68,7 @@ func (e *echoServer) CreateDBFile(ctx context.Context, req *pb.CreateDBRequest) 
 	if req.ProtoFile == "" {
 		return nil, errors.InvalidArgs(ctx, "missing content of protofile", "missing content of protofile")
 	}
+	fmt.Printf("Creating files for %s from file %s\n", req.Message, req.ProtoFileName)
 	pkg := "db"
 	if req.Package != "" {
 		pkg = req.Package
@@ -128,21 +129,21 @@ func files(req *pb.CreateDBRequest, pkg string, idfield string, tname, tprefix s
 		break
 	}
 	if apipkg == "" {
-		return nil, fmt.Errorf("Unable to find package in protofile content")
+		return nil, errors.Errorf("Unable to find package in protofile content")
 	}
 	fmt.Printf("APIPackage: \"%s\" (%s)\n", apipkg, msgname)
 	reader := strings.NewReader(content)
 	parser := proto.NewParser(reader)
 	definition, err := parser.Parse()
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse file: %s", err)
+		return nil, errors.Errorf("failed to parse file: %s", err)
 	}
 	importpath := req.ImportPath
 	if importpath == "" {
 		// derive from protofile
 		sx := strings.Split(req.ProtoFileName, "/")
 		if len(sx) < 5 {
-			return nil, fmt.Errorf("No importpath specified and length of protofile path is too short (%d parts) (path=%s)", len(sx), req.ProtoFileName)
+			return nil, errors.Errorf("No importpath specified and length of protofile path is too short (%d parts) (path=%s)", len(sx), req.ProtoFileName)
 		}
 		importpath = fmt.Sprintf("%s/%s", sx[len(sx)-4], sx[len(sx)-3])
 	}
@@ -205,7 +206,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 			continue
 		}
 		if x.Name == "" {
-			err := fmt.Errorf("weirdo field without name in line %d\n", x.Position.Line)
+			err := errors.Errorf("weirdo field without name in line %d\n", x.Position.Line)
 			fmt.Printf("Error: %s\n", err)
 			h.err = err
 			return
@@ -276,7 +277,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 				fmt.Printf("***** WARNING. Object references are not yet resolved (action=%d, field=\"%s\", comment=\"%s\")\n", refaction, x.Name, comment(x))
 				if refaction == 0 {
 					// abort with error
-					h.err = fmt.Errorf("   unknown type %s for %s\n", x.Type, x.Name)
+					h.err = errors.Errorf("   unknown type %s for %s\n", x.Type, x.Name)
 					break
 				} else if refaction == 2 {
 					// ignore it
@@ -309,7 +310,8 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 	creator.ProtoCreateFields = h.protoCreateFields
 	err := creator.CreateByDef(&def)
 	if err != nil {
-		h.err = fmt.Errorf("failed to create by def: %s", err)
+		fmt.Printf("Error: %s\n", errors.ErrorStringWithStackTrace(err))
+		h.err = errors.Errorf("failed to create \"%s\" by def: %s", m.Name, err)
 		return
 	}
 	gof := creator.DBGo()
@@ -319,7 +321,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 		if *save_fail {
 			ioutil.WriteFile("/tmp/failed.go", []byte(gof), 0660)
 		}
-		h.err = fmt.Errorf("Gofmt for %s failed: %s", m.Name, err)
+		h.err = errors.Errorf("Gofmt for %s failed: %s", m.Name, err)
 		fmt.Println(res)
 		return
 	}
@@ -336,7 +338,7 @@ func names(content string) (*Handlers, error) {
 	parser := proto.NewParser(reader)
 	definition, err := parser.Parse()
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse file: %s", err)
+		return nil, errors.Errorf("failed to parse file: %s", err)
 	}
 	ha := &Handlers{
 		pkg:     "foobarpackage",
@@ -370,7 +372,3 @@ func comment(field *proto.NormalField) string {
 	}
 	return ""
 }
-
-
-
-
