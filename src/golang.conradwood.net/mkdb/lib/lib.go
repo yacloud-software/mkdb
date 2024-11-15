@@ -313,6 +313,14 @@ func (c *Creator) T_ColNameToField(colname string) string {
 	}
 	return pf.Name
 }
+func (c *Creator) T_ColNameToFieldGetter(colname string) string {
+	pf := c.ColNameToField(colname)
+	if pf == nil {
+		return "NOFIELDFORCOLUMN: \"" + colname + "\""
+	}
+	return pf.Name
+}
+
 func (c *Creator) ColNameToField(colname string) *mkdb.ProtoField {
 	for k, v := range c.fieldcols {
 		if v != colname {
@@ -472,6 +480,7 @@ func (c *Creator) CreateByDef(def *mkdb.ProtoDef) error {
 		"cols_no_id":               c.T_cols_no_id,
 		"col_name":                 c.T_col_name,
 		"col2fieldname":            c.T_ColNameToField,
+		"col2fieldgetter":          c.T_ColNameToFieldGetter,
 		"col_notnull":              c.T_col_notnull,
 		"col_sqltype":              c.T_col_sqltype,
 		"col_extraopts":            c.T_col_extraopts,
