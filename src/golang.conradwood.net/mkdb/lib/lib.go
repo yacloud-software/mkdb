@@ -318,6 +318,11 @@ func (c *Creator) T_ColNameToFieldGetter(colname string) string {
 	if pf == nil {
 		return "NOFIELDFORCOLUMN: \"" + colname + "\""
 	}
+	s := c.GetFieldValueName(pf)
+	is_reference := strings.Contains(s, ".")
+	if is_reference {
+		return pf.Name + "_ID"
+	}
 	return pf.Name
 }
 
