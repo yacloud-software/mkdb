@@ -4,7 +4,7 @@
 */
 
 /* geninfo:
-   filename  : protos/golang.conradwood.net/apis/mkdb/mkdb.proto
+   filename  : golang.conradwood.net/apis/mkdb/mkdb.proto
    gopackage : golang.conradwood.net/apis/mkdb
    importname: ai_0
    clientfunc: GetMKDB
@@ -51,7 +51,3 @@ func init() {
    client.RegisterDependency("mkdb.MKDB")
    AddService("mkdb.MKDB")
 }
-
-
-
-

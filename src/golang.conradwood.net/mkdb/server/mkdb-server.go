@@ -4,6 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/emicklei/proto"
 	pb "golang.conradwood.net/apis/mkdb"
 	"golang.conradwood.net/go-easyops/cmdline"
@@ -13,9 +17,6 @@ import (
 	"golang.conradwood.net/mkdb/lib"
 	"golang.conradwood.net/mkdb/linux"
 	"google.golang.org/grpc"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 var (
@@ -315,14 +316,15 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 		return
 	}
 	gof := creator.DBGo()
-	res, err := linux.SafelyExecute([]string{cmdline.GetYACloudDir() + "/ctools/dev/go/current/go/bin/gofmt"}, strings.NewReader(gof))
+	gofmt_com := cmdline.GetYACloudDir() + "/ctools/dev/go/current/go/bin/gofmt"
+	res, err := linux.SafelyExecute([]string{gofmt_com}, strings.NewReader(gof)) // pipe .go file through stdin to gofmt
 	if err != nil {
-		fmt.Printf("gofmt failed:\n%s\n", gof)
+		fmt.Printf("%s failed:\n%s\n", gofmt_com, gof)
 		if *save_fail {
 			ioutil.WriteFile("/tmp/failed.go", []byte(gof), 0660)
 		}
-		h.err = errors.Errorf("Gofmt for %s failed: %s", m.Name, err)
-		fmt.Println(res)
+		h.err = errors.Errorf("gofmt for %s failed: %s", m.Name, err)
+		fmt.Printf("%s output:\n-----\n%s\n-----\n", gofmt_com, res)
 		return
 	}
 	h.gofiles[m.Name] = res

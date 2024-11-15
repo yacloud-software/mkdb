@@ -6,11 +6,12 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"strings"
+	"text/template"
+
 	"golang.conradwood.net/apis/mkdb"
 	"golang.conradwood.net/go-easyops/errors"
 	"golang.conradwood.net/go-easyops/utils"
-	"strings"
-	"text/template"
 )
 
 var (
@@ -25,6 +26,7 @@ var (
 		"public":    "r_public",
 		"timestamp": "r_timestamp",
 		"end":       "r_end",
+		"as":        "r_as",
 	}
 )
 
