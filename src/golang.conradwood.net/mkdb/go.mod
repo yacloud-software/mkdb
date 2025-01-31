@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/emicklei/proto v1.13.2
 	golang.conradwood.net/apis/mkdb v1.1.1417
-	golang.conradwood.net/go-easyops v0.1.33474
+	golang.conradwood.net/go-easyops v0.1.33605
 	google.golang.org/grpc v1.69.2
 )
 
