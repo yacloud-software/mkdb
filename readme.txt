@@ -86,3 +86,16 @@ message Foo {
 
 
 
+
+============= custom handlers ========
+these apply filters to all query and store operations
+type s struct {
+}
+// return map of column names and values to query for
+func (s *s) FieldsToQuery(ctx context.Context) (map[string]any, error) {
+	return map[string]any{"active": true}, nil // this will return only rows where active == true
+}
+// return map of column names and values to store in database in addition to the proto
+func (s *s) FieldsToStore(ctx context.Context, i interface{}) (map[string]any, error) {
+	return map[string]any{"saved": time.Now().Unix()}, nil // this will save current timestamp to column saved
+}
