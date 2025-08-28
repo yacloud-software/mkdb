@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/proto"
+	"golang.conradwood.net/apis/common"
 	pb "golang.conradwood.net/apis/mkdb"
 	"golang.conradwood.net/go-easyops/cmdline"
 	"golang.conradwood.net/go-easyops/errors"
@@ -30,8 +31,10 @@ type echoServer struct {
 
 func main() {
 	flag.Parse()
+	server.SetHealth(common.Health_STARTING)
 	sd := server.NewServerDef()
 	sd.SetPort(*port)
+	sd.SetOnStartupCallback(startup)
 	sd.SetRegister(server.Register(
 		func(server *grpc.Server) error {
 			e := new(echoServer)
@@ -43,10 +46,10 @@ func main() {
 	utils.Bail("Unable to start server", err)
 	os.Exit(0)
 }
+func startup() {
+	server.SetHealth(common.Health_READY)
+}
 
-/************************************
-* grpc functions
-************************************/
 func (e *echoServer) GetMessages(ctx context.Context, req *pb.GetMessagesRequest) (*pb.GetMessageResponse, error) {
 	resp := &pb.GetMessageResponse{}
 	ha, err := names(req.ProtoFile)
@@ -106,21 +109,16 @@ type Handlers struct {
 	apipkg            string
 	enums             []string
 	idfield           string
-	gofiles           map[string]string // one gofile per message
+	gofiles           map[string]string
 	tablename         string
 	tableprefix       string
-	protoCreateFields map[string]string // fieldname -> package.message (for from-rows create like "Foo: &savepb.Bar{}")
+	protoCreateFields map[string]string
 }
 
-/************************************************************************
-* create go files from protos
-************************************************************************/
-
-// create .go files
 func files(req *pb.CreateDBRequest, pkg string, idfield string, tname, tprefix string) (*Handlers, error) {
 	msgname := req.Message
 	content := req.ProtoFile
-	// find out which package the protofile lives in..
+
 	apipkg := ""
 	for _, l := range strings.Split(content, "\n") {
 		if !strings.Contains(l, "package") {
@@ -141,7 +139,7 @@ func files(req *pb.CreateDBRequest, pkg string, idfield string, tname, tprefix s
 	}
 	importpath := req.ImportPath
 	if importpath == "" {
-		// derive from protofile
+
 		sx := strings.Split(req.ProtoFileName, "/")
 		if len(sx) < 5 {
 			return nil, errors.Errorf("No importpath specified and length of protofile path is too short (%d parts) (path=%s)", len(sx), req.ProtoFileName)
@@ -159,13 +157,12 @@ func files(req *pb.CreateDBRequest, pkg string, idfield string, tname, tprefix s
 		tableprefix:       tprefix,
 		protoCreateFields: make(map[string]string),
 	}
-	// resolve first:
+
 	proto.Walk(definition,
 		proto.WithEnum(ha.findEnum),
 		proto.WithService(ha.handleService),
 		proto.WithMessage(ha.handleMessageNameOnly))
 
-	//create
 	proto.Walk(definition,
 		proto.WithService(ha.handleService),
 		proto.WithMessage(ha.handleMessage))
@@ -181,7 +178,7 @@ func (h *Handlers) findEnum(s *proto.Enum) {
 }
 
 func (h *Handlers) handleService(s *proto.Service) {
-	//	fmt.Println(s.Name)
+
 }
 func (h *Handlers) handleMessageNameOnly(m *proto.Message) {
 	fmt.Printf("Message: %s\n", m.Name)
@@ -192,7 +189,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 		ImportPath: h.apipkg,
 		Name:       m.Name,
 	}
-	//fmt.Printf("%s\n", m.Name)
+
 	h.messages = append(h.messages, m.Name)
 	if m.Name != h.msg {
 		return
@@ -213,7 +210,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 			return
 		}
 		tn := lib.From_proto_string(x.Type)
-		// find nested messages
+
 		if tn == 0 {
 			if strings.Contains(x.Type, ".") {
 				fmt.Printf("Field %s Contains dot, skipping initalisation (because we cannot add imports yet)\n", x.Name)
@@ -255,7 +252,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 		t := lib.From_proto_string(x.Type)
 		pk := false
 		if strings.ToLower(x.Name) == strings.ToLower(idf) {
-			pk = true // primary key
+			pk = true
 		}
 
 		if t == 0 {
@@ -267,32 +264,25 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 					fmt.Printf("cannot yet handle repeated fields for %s %s\n", x.Type, x.Name)
 					continue
 				}
-				/* it is a reference to another message - how do we handle it?
-				* we can
-				* 1) abort with error
-				* 2) ignore it
-				* 3) reference resolve via ID
-				* services we know use it: "gitserver", "document" ...
-				 */
+
 				refaction := 2
 				fmt.Printf("***** WARNING. Object references are not yet resolved (action=%d, field=\"%s\", comment=\"%s\")\n", refaction, x.Name, comment(x))
 				if refaction == 0 {
-					// abort with error
+
 					h.err = errors.Errorf("   unknown type %s for %s\n", x.Type, x.Name)
 					break
 				} else if refaction == 2 {
-					// ignore it
+
 					continue
 				} else if refaction == 3 {
-					// reference resolve:
+
 					t = lib.From_proto_string("uint64")
 				}
 			}
 		}
 		pf := &pb.ProtoField{Options: opts, Name: x.Name, Type: t, PrimaryKey: pk}
-		def.Fields = append(def.Fields, pf) // add the name to the list
+		def.Fields = append(def.Fields, pf)
 
-		//		fmt.Printf("   %s %s (%d)\n", x.Name, x.Type, t)
 	}
 	if *debug {
 		fmt.Printf("   %d fields\n", len(def.Fields))
@@ -317,7 +307,7 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 	}
 	gof := creator.DBGo()
 	gofmt_com := cmdline.GetYACloudDir() + "/ctools/dev/go/current/go/bin/gofmt"
-	res, err := linux.SafelyExecute([]string{gofmt_com}, strings.NewReader(gof)) // pipe .go file through stdin to gofmt
+	res, err := linux.SafelyExecute([]string{gofmt_com}, strings.NewReader(gof))
 	if err != nil {
 		fmt.Printf("%s failed:\n%s\n", gofmt_com, gof)
 		if *save_fail {
@@ -331,10 +321,6 @@ func (h *Handlers) handleMessage(m *proto.Message) {
 
 }
 
-/************************************************************************
-* get proto names
-************************************************************************/
-// get the names...
 func names(content string) (*Handlers, error) {
 	reader := strings.NewReader(content)
 	parser := proto.NewParser(reader)
